@@ -1,138 +1,137 @@
 import streamlit as st
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-import io
+import numpy as np
+import base64
+from io import BytesIO
 
-# ---------------------- BMI Calculation and Categorization ------------------------
+# ------------------------------
+# Helper Functions
+# ------------------------------
 
 def calculate_bmi(height_cm, weight_kg):
-    return weight_kg / ((height_cm / 100) ** 2)
+    height_m = height_cm / 100
+    return weight_kg / (height_m ** 2)
 
 def categorize_bmi(bmi):
     if bmi < 18.5:
-        return 'Underweight'
-    elif 18.5 <= bmi < 25:
-        return 'Normal'
-    elif 25 <= bmi < 30:
-        return 'Overweight'
+        return "Underweight"
+    elif 18.5 <= bmi < 24.9:
+        return "Normal"
+    elif 25 <= bmi < 29.9:
+        return "Overweight"
     else:
-        return 'Obese'
+        return "Obese"
 
 def get_health_tips(bmi, age):
     if bmi < 18.5:
-        return "Eat nutrient-rich foods, increase protein intake, and consult a dietitian."
-    elif 18.5 <= bmi < 25:
-        return "Maintain your healthy weight through regular exercise and balanced meals."
-    elif 25 <= bmi < 30:
-        return "Reduce sugary and fatty foods, include daily exercise, and monitor portion sizes."
+        return "Increase calorie intake with healthy foods 🥑. Consider strength training 💪 and check for underlying issues with a physician."
+    elif 18.5 <= bmi < 24.9:
+        return "Maintain current routine 🥗. Regular exercise 🏃‍♂️ and annual checkups 👨‍⚕️ are recommended."
+    elif 25 <= bmi < 29.9:
+        return "Adopt a calorie-conscious diet 🍽️, exercise regularly 🏋️‍♀️, and avoid processed foods 🚫."
     else:
-        return "Consult a healthcare provider, adopt a weight loss plan, and avoid processed foods."
+        return "Seek professional advice 🩺, follow a strict diet plan 🥦, and increase physical activity 🚶‍♀️."
 
-# ---------------------- UI Setup ------------------------
+def style_bmi_category(cat):
+    colors = {
+        "Underweight": "orange",
+        "Normal": "green",
+        "Overweight": "blue",
+        "Obese": "red"
+    }
+    return f"color: {colors.get(cat, 'black')}"
 
-st.set_page_config(page_title="BMI Calculator", layout="wide")
-st.title("💪 Body Mass Index (BMI) Calculator")
+def file_download(df):
+    towrite = BytesIO()
+    df.to_csv(towrite, index=False)
+    towrite.seek(0)
+    b64 = base64.b64encode(towrite.read()).decode()
+    return f'<a href="data:file/csv;base64,{b64}" download="bmi_results.csv">📥 Download CSV</a>'
 
-# Sidebar navigation
-mode = st.sidebar.radio("Select Mode", ["Single User", "Batch Upload"])
+def show_bmi_reference_table():
+    st.sidebar.markdown("### 📊 BMI Reference Table")
+    st.sidebar.table(pd.DataFrame({
+        "Category": ["Underweight", "Normal", "Overweight", "Obese"],
+        "BMI Range": ["< 18.5", "18.5 – 24.9", "25 – 29.9", "30 and above"]
+    }))
 
-# Sidebar BMI Category Reference Table
-st.sidebar.markdown("### 📊 BMI Reference Table")
-st.sidebar.markdown("""
-| Category     | BMI Range   | Symbol |
-|--------------|-------------|-------|
-| Underweight  | < 18.5      | 🟡    |
-| Normal       | 18.5 – 24.9 | 🟢    |
-| Overweight   | 25 – 29.9   | 🟠    |
-| Obese        | ≥ 30        | 🔴    |
-""")
+# ------------------------------
+# Streamlit UI
+# ------------------------------
 
-# ---------------------- Single User Mode ------------------------
+st.set_page_config(page_title="BMI Calculator", layout="centered", initial_sidebar_state="expanded")
+st.title("💪 BMI Calculator Web App")
+st.markdown("Made by **Anirudh Mattathil**, Register Number - **V01151294**")
+st.sidebar.title("Navigation")
+mode = st.sidebar.radio("Choose Mode", ("Single User", "Batch Upload"))
+
+# Add BMI Reference Table to Sidebar
+show_bmi_reference_table()
+
+# ------------------------------
+# Single User Mode
+# ------------------------------
 
 if mode == "Single User":
-    st.subheader("👤 Single User Mode")
-    col1, col2 = st.columns(2)
+    st.subheader("🔍 Calculate BMI for a Single User")
 
-    with col1:
-        age = st.number_input("Age", min_value=1, max_value=120, value=25)
-        gender = st.selectbox("Gender", ["Male", "Female", "Other"])
+    with st.form(key="bmi_form"):
+        col1, col2 = st.columns(2)
+        with col1:
+            age = st.number_input("Age", min_value=1, max_value=120, value=25)
+            height = st.number_input("Height (cm)", min_value=50.0, max_value=250.0, value=170.0)
+        with col2:
+            gender = st.selectbox("Gender", ["Male", "Female", "Other"])
+            weight = st.number_input("Weight (kg)", min_value=20.0, max_value=300.0, value=65.0)
 
-    with col2:
-        height_cm = st.number_input("Height (cm)", min_value=50.0, max_value=250.0, value=170.0)
-        weight_kg = st.number_input("Weight (kg)", min_value=10.0, max_value=200.0, value=70.0)
+        submit = st.form_submit_button("Calculate BMI")
 
-    if st.button("Calculate BMI"):
-        bmi = calculate_bmi(height_cm, weight_kg)
-        category = categorize_bmi(bmi)
-        tips = get_health_tips(bmi, age)
+    if submit:
+        if height > 0 and weight > 0:
+            bmi = calculate_bmi(height, weight)
+            category = categorize_bmi(bmi)
+            tips = get_health_tips(bmi, age)
 
-        st.markdown(f"### 🧮 Your BMI: `{bmi:.2f}`")
-        if category == "Underweight":
-            st.markdown("**Category: 🟡 Underweight**")
-        elif category == "Normal":
-            st.markdown("**Category: 🟢 Normal**")
-        elif category == "Overweight":
-            st.markdown("**Category: 🟠 Overweight**")
+            st.success(f"Your BMI is **{bmi:.2f}**")
+            st.markdown(f"### 🧭 Category: <span style='{style_bmi_category(category)}'><b>{category}</b></span>", unsafe_allow_html=True)
+            st.info(f"💡 **Tips:** {tips}")
         else:
-            st.markdown("**Category: 🔴 Obese**")
+            st.error("Height and Weight must be greater than zero.")
 
-        st.markdown(f"### 💡 Health Tip:\n{tips}")
-
-# ---------------------- Batch Upload Mode ------------------------
+# ------------------------------
+# Batch Upload Mode
+# ------------------------------
 
 else:
-    st.subheader("📂 Batch Upload Mode")
+    st.subheader("📁 Upload File for Batch BMI Calculation")
     uploaded_file = st.file_uploader("Upload CSV or Excel file", type=["csv", "xls", "xlsx"])
 
-    if uploaded_file:
+    if uploaded_file is not None:
         try:
-            if uploaded_file.name.endswith('.csv'):
+            if uploaded_file.name.endswith(".csv"):
                 df = pd.read_csv(uploaded_file)
             else:
                 df = pd.read_excel(uploaded_file)
 
-            expected_cols = {'Name', 'Age', 'Gender', 'Height(cm)', 'Weight(kg)'}
+            expected_cols = {"Name", "Age", "Gender", "Height(cm)", "Weight(kg)"}
             if not expected_cols.issubset(df.columns):
-                st.error(f"❌ File must contain the following columns: {expected_cols}")
+                st.error(f"Input file must contain columns: {expected_cols}")
             else:
-                # Add BMI columns
-                df['BMI'] = df.apply(lambda row: calculate_bmi(row['Height(cm)'], row['Weight(kg)']), axis=1)
-                df['Category'] = df['BMI'].apply(categorize_bmi)
-                df['Suggestions'] = df.apply(lambda row: get_health_tips(row['BMI'], row['Age']), axis=1)
+                df["BMI"] = df.apply(lambda row: calculate_bmi(row["Height(cm)"], row["Weight(kg)"]), axis=1)
+                df["Category"] = df["BMI"].apply(categorize_bmi)
+                df["Suggestions"] = df.apply(lambda row: get_health_tips(row["BMI"], row["Age"]), axis=1)
 
-                # Show styled table
-                def color_bmi(val):
-                    if val < 18.5:
-                        return 'background-color: #FFF3CD'  # Yellow
-                    elif 18.5 <= val < 25:
-                        return 'background-color: #D4EDDA'  # Green
-                    elif 25 <= val < 30:
-                        return 'background-color: #FFE5B4'  # Orange
-                    else:
-                        return 'background-color: #F8D7DA'  # Red
+                st.success("BMI Calculated Successfully!")
+                st.dataframe(df.style.applymap(lambda val: f"color: {style_bmi_category(val).split(': ')[1]}" if val in ["Underweight", "Normal", "Overweight", "Obese"] else None, subset=["Category"]))
 
-                styled_df = df.style.applymap(color_bmi, subset=['BMI'])
-                st.dataframe(styled_df, use_container_width=True)
-
-                # BMI Distribution Chart
-                st.markdown("### 📊 BMI Category Distribution")
-                fig, ax = plt.subplots()
-                sns.countplot(data=df, x='Category', palette="pastel", order=['Underweight', 'Normal', 'Overweight', 'Obese'], ax=ax)
-                ax.set_ylabel("Number of People")
-                ax.set_title("Distribution of BMI Categories")
-                st.pyplot(fig)
-
-                # Download button
-                towrite = io.BytesIO()
-                df.to_csv(towrite, index=False)
-                towrite.seek(0)
-                st.download_button("📥 Download Results CSV", data=towrite, file_name="BMI_Results.csv", mime="text/csv")
+                st.markdown(file_download(df), unsafe_allow_html=True)
 
         except Exception as e:
-            st.error(f"⚠️ Error processing file: {e}")
+            st.error(f"Something went wrong while processing the file: {e}")
 
-# ---------------------- Footer ------------------------
+# ------------------------------
+# Footer
+# ------------------------------
 
 st.markdown("---")
-st.markdown("© Made by **Anirudh Mattathil**, Register Number - **V01151294**")
+st.markdown("<center>© 2025 Made by <b>Anirudh Mattathil</b> | Register Number - <b>V01151294</b></center>", unsafe_allow_html=True)

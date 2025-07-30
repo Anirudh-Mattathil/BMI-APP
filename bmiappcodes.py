@@ -98,7 +98,24 @@ st.set_page_config(page_title="BMI Calculator", layout="centered")
 
 # Theme Switch
 theme_choice = st.sidebar.radio("Choose Theme", ["🌞 Light Mode", "🌙 Dark Mode"])
-if theme_choice == "🌙 Dark Mode":
+
+if theme_choice == "🌞 Light Mode":
+    st.markdown(
+        """
+        <style>
+        .main {
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+        div.stButton > button {
+            color: white;
+            background-color: #0d6efd;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+elif theme_choice == "🌙 Dark Mode":
     st.markdown(
         """
         <style>
@@ -106,8 +123,13 @@ if theme_choice == "🌙 Dark Mode":
             background-color: #0e1117;
             color: white;
         }
+        div.stButton > button {
+            color: white;
+            background-color: #6c757d;
+        }
         </style>
-        """, unsafe_allow_html=True
+        """,
+        unsafe_allow_html=True
     )
 
 # Sidebar BMI Legend

@@ -1,25 +1,42 @@
 # 💪 BMI Calculator Web App (Streamlit)
 
-A user-friendly BMI Calculator web app built with Streamlit. This tool supports both single user and batch (CSV/Excel) BMI computation with categorization, health tips, and data visualizations.
+A sleek and interactive BMI Calculator web application built with **Streamlit**. It supports both **Single User Mode** and **Batch Upload Mode** (CSV or Excel), providing BMI classification, personalized health tips, and insightful visualizations.
+
+---
 
 ## 🚀 Features
 
-- Single user mode with age, gender, height & weight input
-- BMI classification: Underweight, Normal, Overweight, Obese
-- Health suggestions based on BMI & age
-- Batch upload (CSV/Excel): automatic BMI & health tips for each row
-- Downloadable results
-- Chart visualization (BMI distribution & single user BMI bar)
-- Responsive UI & dark/light theme support
+### ✅ Single User Mode  
+- Enter age, gender, height (cm), and weight (kg)  
+- Calculate BMI instantly  
+- Categorizes BMI: Underweight, Normal, Overweight, Obese  
+- Personalized health tips based on BMI and age  
+- Clean and responsive UI with visual cues
+
+### ✅ Batch Upload Mode  
+- Upload a `.csv` or `.xlsx` file  
+- Automatic BMI calculation for each person  
+- Health classification and suggestions  
+- Downloadable results (CSV)  
+- Progress bar for smooth experience
+
+### ✅ Data Visualizations  
+- BMI Distribution Chart (bar plot)  
+- Individual BMI displayed as a horizontal bar
+
+### ✅ Other Highlights   
+- Sidebar navigation  
+- Error handling and validation  
+- Professional and responsive UI design
 
 ---
 
 ## 📂 File Upload Format (Batch Mode)
 
-Upload `.csv` or `.xlsx` with columns:
+Ensure your `.csv` or `.xlsx` file follows this format:
 
 | Name       | Age | Gender | Height(cm) | Weight(kg) |
-| ---------- | --- | ------ | ---------- | ---------- |
+|------------|-----|--------|------------|------------|
 | John Doe   | 28  | Male   | 175        | 75         |
 | Jane Smith | 34  | Female | 160        | 60         |
 
@@ -27,18 +44,23 @@ Upload `.csv` or `.xlsx` with columns:
 
 ## 📊 BMI Categories (WHO Guidelines)
 
-| Category    | BMI Range   | Symbol |
-| ----------- | ----------- | ------ |
-| Underweight | < 18.5      | 🟡     |
-| Normal      | 18.5 – 24.9 | 🟢     |
-| Overweight  | 25 – 29.9   | 🟠     |
-| Obese       | ≥ 30        | 🔴     |
+| Category     | BMI Range     |
+|--------------|---------------|
+| Underweight  | < 18.5        |
+| Normal       | 18.5 – 24.9   |
+| Overweight   | 25 – 29.9     |
+| Obese        | ≥ 30          |
 
+---
 
 ## 🙌 Credits
-Made by **Anirudh Mattathil**, Register Number - **V01151294**
+
+**Made by:** *Anirudh Mattathil*  
+**Register Number:** *V01151294*
 
 ---
 
 ## 📬 License
-This project is open-source and free to use.
+
+This project is open-source and free to use for educational and personal purposes.
+

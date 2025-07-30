@@ -40,12 +40,12 @@ mode = st.sidebar.radio("Select Mode", ["Single User", "Batch Upload"])
 # Sidebar BMI Category Reference Table
 st.sidebar.markdown("### 📊 BMI Reference Table")
 st.sidebar.markdown("""
-| Category     | BMI Range      | Symbol |
-|--------------|----------------|--------|
-| Underweight  | < 18.5         | 🟡     |
-| Normal       | 18.5 – 24.9    | 🟢     |
-| Overweight   | 25 – 29.9      | 🟠     |
-| Obese        | ≥ 30           | 🔴     |
+| Category     | BMI Range   | Symbol |
+|--------------|-------------|-------|
+| Underweight  | < 18.5      | 🟡    |
+| Normal       | 18.5 – 24.9 | 🟢    |
+| Overweight   | 25 – 29.9   | 🟠    |
+| Obese        | ≥ 30        | 🔴    |
 """)
 
 # ---------------------- Single User Mode ------------------------

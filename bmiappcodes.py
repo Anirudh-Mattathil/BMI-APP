@@ -2,16 +2,20 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-import base64
-from io import BytesIO
 
-# === BMI CATEGORY REFERENCE TABLE ===
-BMI_REFERENCE_TABLE = pd.DataFrame({
-    "Category": ["Underweight", "Normal weight", "Overweight", "Obese"],
-    "BMI Range": ["< 18.5", "18.5 – 24.9", "25 – 29.9", "30 or greater"]
-})
+# ------------------------------- #
+# ---------- Functions ---------- #
+# ------------------------------- #
 
-# === FUNCTION: BMI Category ===
+def calculate_bmi(height_cm, weight_kg):
+    try:
+        height_m = height_cm / 100
+        bmi = weight_kg / (height_m ** 2)
+        return round(bmi, 2)
+    except Exception as e:
+        st.error(f"Error calculating BMI: {e}")
+        return None
+
 def categorize_bmi(bmi):
     if bmi < 18.5:
         return "Underweight"
@@ -22,107 +26,107 @@ def categorize_bmi(bmi):
     else:
         return "Obese"
 
-# === FUNCTION: Health Tips ===
 def get_health_tips(bmi, age):
-    if bmi < 18.5:
-        return "💡 Eat more frequently, choose nutrient-rich foods, and strength train to build muscle mass."
-    elif 18.5 <= bmi < 25:
-        return "✅ Maintain a balanced diet, regular physical activity, and routine health checkups."
-    elif 25 <= bmi < 30:
-        return "⚠️ Reduce calorie intake, avoid processed foods, and engage in cardio exercises."
+    category = categorize_bmi(bmi)
+    tips = {
+        "Underweight": "🍚 Eat more frequently with nutrient-dense meals. Consider strength training to build muscle.",
+        "Normal": "🥗 Great job! Continue your balanced diet and regular physical activity to maintain your health.",
+        "Overweight": "🚶 Increase physical activity. Focus on portion control and choose high-fiber foods.",
+        "Obese": "⚠️ Consult a doctor or dietitian. Focus on lifestyle changes and regular checkups."
+    }
+
+    if age < 18:
+        age_tip = "As you're under 18, please consult a pediatrician for personalized advice."
+    elif age > 60:
+        age_tip = "At your age, low-impact exercises and regular health checkups are highly recommended."
     else:
-        return "🚨 Consult a healthcare provider. Adopt a strict fitness regime, limit sugar and fat intake."
+        age_tip = "Maintain regular exercise, stay hydrated, and monitor your food habits."
 
-# === FUNCTION: File Download Helper ===
-def get_table_download_link(df):
-    output = BytesIO()
-    df.to_csv(output, index=False)
-    processed_data = output.getvalue()
-    b64 = base64.b64encode(processed_data).decode()
-    return f'<a href="data:file/csv;base64,{b64}" download="bmi_results.csv">📥 Download Result CSV</a>'
+    return tips[category] + " " + age_tip
 
-# === STREAMLIT APP CONFIG ===
-st.set_page_config(page_title="BMI Calculator", layout="wide", page_icon="⚖️")
+# ------------------------------- #
+# ---------- Main App ----------- #
+# ------------------------------- #
 
-# === SIDEBAR ===
-st.sidebar.title("⚙️ Navigation")
-mode = st.sidebar.radio("Choose Mode", ["Single User Mode", "Batch Upload Mode"])
+st.set_page_config(page_title="BMI Calculator", layout="centered", page_icon="💪")
 
-st.sidebar.markdown("---")
-st.sidebar.subheader("📊 BMI Reference Table")
-st.sidebar.table(BMI_REFERENCE_TABLE)
+st.title("💪 BMI Calculator App")
+st.markdown("A simple and interactive app to calculate **Body Mass Index (BMI)** for individuals or in bulk.")
+st.sidebar.title("Navigation")
+mode = st.sidebar.radio("Choose Mode", ["Single User", "Batch Upload"])
 
-st.sidebar.markdown("---")
-st.sidebar.markdown("**Made by Anirudh Mattathil**  \nRegister Number - V01151294")
+# Footer
+st.markdown(
+    """<hr style="border:1px solid #666">
+    <div style='text-align: center; font-size: 14px;'>
+    Made by <b>Anirudh Mattathil</b><br>Register Number: <b>V01151294</b>
+    </div>""",
+    unsafe_allow_html=True,
+)
 
-# === SINGLE USER MODE ===
-if mode == "Single User Mode":
-    st.title("💪 BMI Calculator - Single User")
-    st.markdown("Enter your personal details below:")
+if mode == "Single User":
+    st.header("📄 Single User BMI Calculator")
 
     col1, col2 = st.columns(2)
     with col1:
-        age = st.number_input("Age", min_value=1, max_value=120, value=25)
-        gender = st.selectbox("Gender", ["Male", "Female", "Other"])
+        age = st.number_input("Enter Age", min_value=1, max_value=120, value=25)
+        gender = st.selectbox("Select Gender", ["Male", "Female", "Other"])
     with col2:
         height = st.number_input("Height (in cm)", min_value=50.0, max_value=250.0, value=170.0)
-        weight = st.number_input("Weight (in kg)", min_value=10.0, max_value=300.0, value=65.0)
+        weight = st.number_input("Weight (in kg)", min_value=10.0, max_value=200.0, value=65.0)
 
     if st.button("Calculate BMI"):
-        bmi = weight / ((height / 100) ** 2)
+        bmi = calculate_bmi(height, weight)
         category = categorize_bmi(bmi)
-        tip = get_health_tips(bmi, age)
+        tips = get_health_tips(bmi, age)
 
-        st.success(f"**Your BMI is:** {bmi:.2f} ({category})")
-        st.markdown(f"### 🩺 Health Suggestion:")
-        st.info(tip)
+        st.success(f"Your BMI is **{bmi}**, categorized as **{category}**.")
+        st.markdown(f"### 🩺 Health Tips:\n{tips}")
 
-        # BMI gauge/chart
         fig, ax = plt.subplots()
-        categories = ['Underweight', 'Normal', 'Overweight', 'Obese']
-        values = [18.5, 25, 30, 40]
-        colors = ['skyblue', 'lightgreen', 'orange', 'red']
-
-        ax.bar(categories, values, color=colors, alpha=0.6)
-        ax.axhline(bmi, color='blue', linestyle='--', label=f'Your BMI: {bmi:.2f}')
-        ax.set_ylabel("BMI")
-        ax.set_title("BMI Category Range")
+        sns.barplot(x=["BMI"], y=[bmi], palette=["#36a2eb"])
+        ax.axhline(18.5, color='orange', linestyle='--', label='Underweight Threshold')
+        ax.axhline(25, color='green', linestyle='--', label='Normal Threshold')
+        ax.axhline(30, color='red', linestyle='--', label='Obese Threshold')
+        ax.set_ylim(10, 40)
+        ax.set_ylabel("BMI Value")
         ax.legend()
         st.pyplot(fig)
 
-# === BATCH UPLOAD MODE ===
-elif mode == "Batch Upload Mode":
-    st.title("🧑‍🤝‍🧑 BMI Calculator - Batch Upload")
-    st.markdown("Upload an Excel or CSV file with the following columns: **Name, Age, Gender, Height(cm), Weight(kg)**")
+elif mode == "Batch Upload":
+    st.header("📂 Batch Upload BMI Calculator")
+    uploaded_file = st.file_uploader("Upload CSV or Excel file", type=["csv", "xlsx"])
 
-    uploaded_file = st.file_uploader("Choose a file", type=['csv', 'xlsx'])
-
-    if uploaded_file is not None:
+    if uploaded_file:
         try:
-            if uploaded_file.name.endswith('.csv'):
+            if uploaded_file.name.endswith(".csv"):
                 df = pd.read_csv(uploaded_file)
             else:
                 df = pd.read_excel(uploaded_file)
 
-            required_columns = ['Name', 'Age', 'Gender', 'Height(cm)', 'Weight(kg)']
-            if not all(col in df.columns for col in required_columns):
-                st.error(f"File must contain the following columns: {required_columns}")
+            required_cols = ['Name', 'Age', 'Gender', 'Height(cm)', 'Weight(kg)']
+            if not all(col in df.columns for col in required_cols):
+                st.error(f"Uploaded file must contain the following columns: {', '.join(required_cols)}")
             else:
-                df['BMI'] = df.apply(lambda row: row['Weight(kg)'] / ((row['Height(cm)'] / 100) ** 2), axis=1)
+                df['BMI'] = df.apply(lambda row: calculate_bmi(row['Height(cm)'], row['Weight(kg)']), axis=1)
                 df['Category'] = df['BMI'].apply(categorize_bmi)
                 df['Suggestions'] = df.apply(lambda row: get_health_tips(row['BMI'], row['Age']), axis=1)
 
-                st.success("✅ BMI Calculated Successfully!")
-                st.dataframe(df.style.background_gradient(cmap='YlOrRd', subset=['BMI']))
+                st.success("BMI calculated successfully!")
+                st.dataframe(df.style.background_gradient(cmap="YlGnBu", subset=["BMI"]))
 
-                st.markdown(get_table_download_link(df), unsafe_allow_html=True)
+                st.download_button("📥 Download Results as CSV", data=df.to_csv(index=False),
+                                   file_name="bmi_results.csv", mime="text/csv")
 
-                # Chart: Distribution of BMI Categories
-                st.subheader("📈 Distribution of BMI Categories")
-                fig, ax = plt.subplots()
-                sns.countplot(data=df, x='Category', palette='Set2', order=['Underweight', 'Normal', 'Overweight', 'Obese'])
-                plt.title("BMI Category Count")
-                st.pyplot(fig)
+                # Optional chart: BMI distribution
+                fig2, ax2 = plt.subplots()
+                sns.histplot(df["BMI"], bins=10, kde=True, color='skyblue')
+                ax2.set_title("BMI Distribution")
+                ax2.set_xlabel("BMI")
+                st.pyplot(fig2)
 
         except Exception as e:
-            st.error(f"An error occurred: {e}")
+            st.error(f"An error occurred while processing the file: {e}")
+    else:
+        st.info("Please upload a valid CSV or Excel file.")
+

@@ -130,3 +130,4 @@ elif mode == "Batch Upload":
     else:
         st.info("Please upload a valid CSV or Excel file.")
 
+

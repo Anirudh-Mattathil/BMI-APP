@@ -1,22 +1,16 @@
-# 💪 BMI Calculator Web App
+# 💪 BMI Calculator Web App (Streamlit)
 
-A **modern and interactive Streamlit app** that calculates **Body Mass Index (BMI)** and offers personalized health tips — perfect for individuals or health professionals managing group data.
+A user-friendly BMI Calculator web app built with Streamlit. This tool supports both single user and batch (CSV/Excel) BMI computation with categorization, health tips, and data visualizations.
 
----
+## 🚀 Features
 
-## 🧭 Features
-
-✅ **Two Modes:**
-
-- 👤 **Single User Mode**: Enter age, gender, height & weight — get instant BMI and smart tips.
-- 📂 **Batch Upload Mode**: Upload a `.csv` or `.xlsx` file for multiple users — get results, tips, and visualizations.
-
-✅ **Personalized Health Tips**  
-✅ **BMI Classification & Color Feedback**  
-✅ **BMI Pie Chart for Group Insights**  
-✅ **CSV/Excel Download of Results**  
-✅ **Fully Responsive UI with Emojis & Progress Bar**  
-✅ **Error Handling & Professional UI**  
+- Single user mode with age, gender, height & weight input
+- BMI classification: Underweight, Normal, Overweight, Obese
+- Health suggestions based on BMI & age
+- Batch upload (CSV/Excel): automatic BMI & health tips for each row
+- Downloadable results
+- Chart visualization (BMI distribution & single user BMI bar)
+- Responsive UI & dark/light theme support
 
 ---
 
